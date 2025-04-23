@@ -1,10 +1,11 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { User } from './entities/user.entity'
-import { DeleteResult, Repository } from 'typeorm'
+import { DeleteResult, Like, Repository } from 'typeorm'
 import * as bcrypt from 'bcrypt'
 import { CreateUserDto } from './dto/create-user.dto'
 import { UpdateUserDto } from './dto/update-user.dto'
+import { FilterUserDto } from './dto/filter-user.dto'
 
 @Injectable()
 export class UserService {
@@ -22,12 +23,78 @@ export class UserService {
 
 
     // Tìm tất cả người dùng
-    async findAll(): Promise<User[]> {
+    async findAll(query: FilterUserDto): Promise<any> {
+
+        // Nếu không có giá trị cho items_per_page, mặc định là 10
+        const items_per_page = Number(query.items_per_page) || 10
+        // Nếu không có giá trị cho page, mặc định là 1
+        const page = Number(query.page) || 1
+        // Tính toán số lượng bản ghi cần bỏ qua
+        const skip = (page - 1) * items_per_page
+
+        // Nếu không có giá trị cho search, mặc định là rỗng
+        const keyword = query.search ? query.search : ''
 
         // Trả lại danh sách người dùng với các trường cần thiết
-        return await this.userRepository.find({
+        const [res, total] = await this.userRepository.findAndCount({
+
+            // Sắp xếp theo trường created_at giảm dần
+            order: {
+                created_at: 'DESC'
+            },
+
+            // Giới hạn số lượng bản ghi trả về
+            // Số lượng bản ghi cần lấy
+            take: items_per_page,
+
+            // Bỏ qua số lượng bản ghi đã lấy
+            // Số lượng bản ghi cần bỏ qua
+            skip: skip,
+
+            // Tìm kiếm theo các trường first_name, last_name, email
+            where: [
+                { 
+                    first_name: Like(`%${ keyword }%`)
+                },
+                { 
+                    last_name: Like(`%${ keyword }%`)
+                },
+                { 
+                    email: Like(`%${ keyword }%`)
+                },
+            ],
+
+            // Chọn các trường cần thiết
             select: ['id', 'first_name', 'last_name', 'email', 'status', 'created_at', 'updated_at'],
         })
+        
+        // Nếu tổng số bản ghi = 0 thì lastPage = 1, ngược lại lastPage = tổng số bản ghi chia cho số lượng bản ghi mỗi trang
+        const lastPage = Math.ceil(total / items_per_page)
+
+        // Nếu page + 1 > lastPage thì nextPage = null, ngược lại nextPage = page + 1
+        const nextPage = page + 1 > lastPage ? null : page + 1
+
+        // Nếu page - 1 < 1 thì prevPage = null, ngược lại prevPage = page - 1
+        const prevPage = page - 1 < 1 ? null : page - 1
+
+
+        // Trả về dữ liệu người dùng với các trường cần thiết
+        // data: danh sách người dùng
+        // currenPage: trang hiện tại
+        // items_per_page: số lượng bản ghi mỗi trang
+        // total: tổng số bản ghi
+        // last_page: trang cuối cùng
+        // next_page: trang tiếp theo
+        // prev_page: trang trước đó
+        return {
+            data: res,
+            currenPage: page,
+            items_per_page: items_per_page,
+            total: total,
+            last_page: lastPage,
+            next_page: nextPage,
+            prev_page: prevPage
+        }
     }
 
 

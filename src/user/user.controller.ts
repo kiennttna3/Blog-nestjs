@@ -1,9 +1,10 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from '@nestjs/common'
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards } from '@nestjs/common'
 import { UserService } from './user.service'
 import { User } from './entities/user.entity'
 import { AuthGuard } from 'src/auth/auth.guard'
 import { CreateUserDto } from './dto/create-user.dto'
 import { UpdateUserDto } from './dto/update-user.dto'
+import { FilterUserDto } from './dto/filter-user.dto'
 
 @Controller('users')
 export class UserController {
@@ -27,10 +28,11 @@ export class UserController {
     // Tìm tất cả người dùng
     // findAll() là một phương thức của UserService cho phép bạn tìm tất cả người dùng
     // Promise<User[]> là một kiểu dữ liệu trả về của phương thức này
-    findAll(): Promise<User[]> {
+    findAll(@Query() query: FilterUserDto): Promise<User[]> {
+        console.log(query)
         // Gọi phương thức findAll() của UserService để tìm tất cả người dùng
         // Trả về danh sách người dùng
-        return this.userService.findAll()
+        return this.userService.findAll(query)
     }
 
 

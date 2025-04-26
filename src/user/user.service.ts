@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { User } from './entities/user.entity'
-import { DeleteResult, Like, Repository } from 'typeorm'
+import { DeleteResult, Like, Repository, UpdateResult } from 'typeorm'
 import * as bcrypt from 'bcrypt'
 import { CreateUserDto } from './dto/create-user.dto'
 import { UpdateUserDto } from './dto/update-user.dto'
@@ -174,5 +174,14 @@ export class UserService {
 
         // Xóa người dùng ra khỏi cơ sở dữ liệu
         return await this.userRepository.delete(id)
+    }
+
+
+
+    // Cập nhật avatar người dùng
+    async updateAvatar(id: number, avatar: string): Promise<UpdateResult> {
+
+        // cập nhật avatar cho người dùng
+        return await this.userRepository.update({ id }, { avatar })
     }
 }

@@ -154,9 +154,7 @@ export class AuthService {
             }
 
         // Nếu refresh token không hợp lệ, ném ra lỗi 401
-        } catch(error) {
-            console.log(error)
-            
+        } catch {
             throw new HttpException("Refresh token không hợp lệ", HttpStatus.UNAUTHORIZED)
         }
     }

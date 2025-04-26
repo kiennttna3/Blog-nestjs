@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards } from '@nestjs/common'
+import { BadRequestException, Body, Controller, Delete, Get, Param, Post, Put, Query, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common'
 import { UserService } from './user.service'
 import { User } from './entities/user.entity'
 import { AuthGuard } from 'src/auth/auth.guard'
@@ -6,6 +6,9 @@ import { CreateUserDto } from './dto/create-user.dto'
 import { UpdateUserDto } from './dto/update-user.dto'
 import { FilterUserDto } from './dto/filter-user.dto'
 import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger'
+import { FileInterceptor } from '@nestjs/platform-express'
+import { storageConfig } from 'helpers/config'
+import { extname } from 'path'
 
 // ApiBearerAuth là một decorator của NestJS cho phép bạn xác định rằng các route này yêu cầu xác thực bằng Bearer token
 // Nó sẽ tự động thêm một trường Authorization vào tài liệu Swagger để bạn có thể nhập Bearer token khi gọi API
@@ -39,7 +42,7 @@ export class UserController {
     // findAll() là một phương thức của UserService cho phép bạn tìm tất cả người dùng
     // Promise<User[]> là một kiểu dữ liệu trả về của phương thức này
     findAll(@Query() query: FilterUserDto): Promise<User[]> {
-        console.log(query)
+
         // Gọi phương thức findAll() của UserService để tìm tất cả người dùng
         // Trả về danh sách người dùng
         return this.userService.findAll(query)
@@ -57,6 +60,7 @@ export class UserController {
     // Tìm người dùng theo ID
     // findOne() là một phương thức của UserService cho phép bạn tìm người dùng theo ID
     findOne(@Param('id') id: string): Promise<User> {
+
         // Gọi phương thức findOne() của UserService để tìm người dùng theo ID
         // Trả về dữ liệu người dùng
         return this.userService.findOne(Number(id))
@@ -74,6 +78,7 @@ export class UserController {
     // Tạo mới người dùng
     // create() là một phương thức của UserService cho phép bạn tạo mới người dùng
     create(@Body() createUserDto: CreateUserDto): Promise<User> {
+
         // Gọi phương thức create() của UserService để tạo mới người dùng
         // Trả về dữ liệu người dùng mới
         return this.userService.create(createUserDto)
@@ -91,6 +96,7 @@ export class UserController {
     // Cập nhật thông tin người dùng
     // update() là một phương thức của UserService cho phép bạn cập nhật thông tin người dùng
     update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+
         // Gọi phương thức update() của UserService để cập nhật thông tin người dùng
         // Trả về dữ liệu đã cập nhật (mới và cũ)
         return this.userService.update(Number(id), updateUserDto)
@@ -108,8 +114,63 @@ export class UserController {
     // Xóa người dùng
     // delete() là một phương thức của UserService cho phép bạn xóa người dùng
     delete(@Param('id') id: string) {
+
         // Gọi phương thức delete() của UserService để xóa người dùng
         // Trả về dữ liệu đã xóa
         return this.userService.delete(Number(id))
+    }
+
+
+
+
+    // Đánh dấu route này là POST
+    // @Post('upload-avatar') là một decorator của NestJS cho phép bạn định nghĩa route POST với tham số upload-avatar
+    @Post('upload-avatar')
+    // Sử dụng AuthGuard để bảo vệ các route này
+    // AuthGuard là một lớp bảo vệ của NestJS cho phép bạn kiểm tra quyền truy cập của người dùng
+    @UseGuards(AuthGuard)
+    // UseInterceptors là một decorator của NestJS cho phép bạn xử lý các request và response trước và sau khi chúng được gửi đi
+    // Sử dụng FileInterceptor để xử lý file tải lên
+    // FileInterceptor là một lớp của NestJS cho phép bạn xử lý file tải lên
+    @UseInterceptors(FileInterceptor('avatar', {
+        // storageConfig là một hàm của bạn để cấu hình nơi lưu trữ file tải lên
+        storage: storageConfig('avatar'),
+        // fileFilter là một hàm của bạn để xác thực file tải lên
+        fileFilter: (req, file, cb) => {
+            // extname là một hàm của Node.js cho phép bạn lấy phần mở rộng của file
+            const ext = extname(file.originalname)
+            const allowedExtArr = ['.png', '.jpg', '.jpeg']
+            if (!allowedExtArr.includes(ext)) {
+                req.fileValidationError = `File không hợp lệ. Chỉ cho phép file đuôi: ${ allowedExtArr.toString() }`
+                cb(null, false)
+            } else {
+                const fileSize = parseInt(req.headers['content-length'])
+                if (fileSize > 1024 * 1024 * 5) {
+                    req.fileValidationError = 'File không hợp lệ. Kích thước file tối đa là 5MB'
+                    cb(null, false)
+                } else {
+                    cb(null, true)
+
+                }
+            }
+        }
+    }))
+    // uploadAvatar() là một phương thức của UserService cho phép bạn tải lên ảnh đại diện
+    // UploadedFile() là một decorator của NestJS cho phép bạn lấy file tải lên từ request
+    uploadAvatar(@Req() req:any, @UploadedFile() file: Express.Multer.File) {
+        console.log("upload")
+        console.log("user data", req.user_data)
+        console.log(file)
+
+        if (req.fileValidationError) {
+            throw new BadRequestException(req.fileValidationError)
+        } if (!file) {
+            throw new BadRequestException('File là bắt buộc')
+        }
+
+        // Gọi phương thức updateAvatar() của UserService để cập nhật ảnh đại diện
+        // Trả về dữ liệu đã cập nhật
+        this.userService.updateAvatar(req.user_data.id, file.destination + '/' + file.filename)
+
     }
 }

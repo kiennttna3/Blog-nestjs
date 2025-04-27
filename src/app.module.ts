@@ -6,6 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm'
 import { dataSourceOptions } from 'db/data-source'
 import { AuthModule } from './auth/auth.module'
 import { ConfigModule } from '@nestjs/config'
+import { PostModule } from './post/post.module';
 
 @Module({
   imports: [
@@ -24,7 +25,9 @@ import { ConfigModule } from '@nestjs/config'
 
     //Import ConfigModule để sử dụng các biến môi trường (environment variables)
     // và cấu hình ứng dụng từ file .env
-    ConfigModule.forRoot()
+    ConfigModule.forRoot(),
+
+    PostModule
   ],
   controllers: [AppController],
   providers: [AppService],

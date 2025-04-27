@@ -22,7 +22,9 @@ export class UserController {
 
     // Tự động tiêm vào UserService
     // UserService là một lớp dịch vụ của NestJS cho phép bạn thực hiện các thao tác CRUD (Create, Read, Update, Delete) trên entity User
-    constructor(private userService: UserService) { }
+    constructor(
+        private userService: UserService
+    ) { }
     
 
 

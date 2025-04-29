@@ -8,7 +8,10 @@ import { Post } from './entities/post.entity';
 
 @Module({
   imports: [
+
+    // Import TypeOrmModule để sử dụng các tính năng của TypeORM
     TypeOrmModule.forFeature([Post, User]),
+    
     // Import ConfigModule để sử dụng các biến môi trường (environment variables)
     ConfigModule
   ],

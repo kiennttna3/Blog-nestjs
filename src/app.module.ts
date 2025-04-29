@@ -7,6 +7,7 @@ import { dataSourceOptions } from 'db/data-source'
 import { AuthModule } from './auth/auth.module'
 import { ConfigModule } from '@nestjs/config'
 import { PostModule } from './post/post.module';
+import { CategoryModule } from './category/category.module';
 
 @Module({
   imports: [
@@ -27,7 +28,9 @@ import { PostModule } from './post/post.module';
     // và cấu hình ứng dụng từ file .env
     ConfigModule.forRoot(),
 
-    PostModule
+    PostModule,
+
+    CategoryModule
   ],
   controllers: [AppController],
   providers: [AppService],

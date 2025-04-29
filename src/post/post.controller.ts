@@ -8,12 +8,21 @@ import { PostService } from './post.service';
 import { FilterPostDto } from './dto/filter-post.dto';
 import { Post as PostEntity } from './entities/post.entity';
 import { UpdatePostDto } from './dto/update-post.dto';
+import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 
+
+// ApiBearerAuth là một decorator của NestJS cho phép bạn xác định rằng các route này yêu cầu xác thực bằng Bearer token
+// Nó sẽ tự động thêm một trường Authorization vào tài liệu Swagger để bạn có thể nhập Bearer token khi gọi API
+@ApiBearerAuth()
+// ApiTags là một decorator của NestJS cho phép bạn nhóm các controller lại với nhau trong tài liệu Swagger
+// Nó giúp bạn dễ dàng tìm kiếm và quản lý các API trong tài liệu Swagger
+@ApiTags('Posts')
+// @Controller là một decorator của NestJS cho phép bạn định nghĩa một controller
 @Controller('posts')
 export class PostController {
     constructor(
         
-         // Tự động tiêm vào PostService
+        // Tự động tiêm vào PostService
         // PostService là một lớp dịch vụ của NestJS cho phép bạn thực hiện các thao tác CRUD (Create, Read, Update, Delete) trên entity Use
         private postService: PostService
     ) { }
@@ -23,6 +32,13 @@ export class PostController {
 
     // Sử dụng AuthGuard để bảo vệ các route này
     // AuthGuard là một lớp bảo vệ của NestJS cho phép bạn kiểm tra quyền truy cập của người dùng
+    @UseGuards(AuthGuard)
+    // ApiQuery là một decorator của NestJS cho phép bạn định nghĩa các tham số truy vấn (query parameters) trong route
+    // Nó giúp bạn dễ dàng tìm kiếm và quản lý các tham số truy vấn trong tài liệu Swagger
+    @ApiQuery( { name: 'page' } )
+    @ApiQuery( { name: 'items_per_page' } )
+    @ApiQuery( { name: 'search' } )
+    @ApiQuery( { name: 'category' } )
     // Đánh dấu route này là GET
     // @Get() là một decorator của NestJS cho phép bạn định nghĩa route GET
     @Get()
@@ -57,7 +73,6 @@ export class PostController {
     // Sử dụng AuthGuard để bảo vệ các route này
     // AuthGuard là một lớp bảo vệ của NestJS cho phép bạn kiểm tra quyền truy cập của người dùng
     @UseGuards(AuthGuard)
-    @UsePipes(ValidationPipe)
     @Post()
     // UseInterceptors là một decorator của NestJS cho phép bạn xử lý các request và response trước và sau khi chúng được gửi đi
     // Sử dụng FileInterceptor để xử lý file tải lên
@@ -89,6 +104,9 @@ export class PostController {
 
 
 
+    // Sử dụng AuthGuard để bảo vệ các route này
+    // AuthGuard là một lớp bảo vệ của NestJS cho phép bạn kiểm tra quyền truy cập của người dùng
+    @UseGuards(AuthGuard)
     // Taọ mới bài viết
     // create() là một phương thức của PostService cho phép bạn tạo mới một bài viết
     // @Body() là một decorator của NestJS cho phép bạn lấy dữ liệu từ body của request
@@ -123,9 +141,10 @@ export class PostController {
 
 
 
-     // Sử dụng AuthGuard để bảo vệ các route này
+    // Sử dụng AuthGuard để bảo vệ các route này
     // AuthGuard là một lớp bảo vệ của NestJS cho phép bạn kiểm tra quyền truy cập của người dùng
     @UseGuards(AuthGuard)
+    // Sử dụng ValidationPipe để xác thực dữ liệu đầu vào
     @UsePipes(ValidationPipe)
     @Put(':id')
     // UseInterceptors là một decorator của NestJS cho phép bạn xử lý các request và response trước và sau khi chúng được gửi đi
@@ -157,7 +176,10 @@ export class PostController {
 
 
 
-    
+
+    // Sử dụng AuthGuard để bảo vệ các route này
+    // AuthGuard là một lớp bảo vệ của NestJS cho phép bạn kiểm tra quyền truy cập của người dùng
+    @UseGuards(AuthGuard)
     // Cập nhật bài viết
     update(
         @Param('id') id: string,

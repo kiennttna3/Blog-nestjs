@@ -1,4 +1,5 @@
 import { IsNotEmpty } from "class-validator"
+import { Category } from "src/category/entities/categoty-entity"
 import { User } from "src/user/entities/user.entity"
 
 export class CreatePostDto {
@@ -13,5 +14,8 @@ export class CreatePostDto {
   status: number
 
   user: User
+
+  @IsNotEmpty()
+  category: Category
 
 }

@@ -1,9 +1,5 @@
-export class FilterPostDto {
+export class FilterCategoryDto {
     page: string
-
     items_per_page: string
-
     search: string
-
-    category: string
 }

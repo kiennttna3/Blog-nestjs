@@ -19,10 +19,10 @@ import { extname } from 'path'
 // @Controller là một decorator của NestJS cho phép bạn định nghĩa một controller
 @Controller('users')
 export class UserController {
-
-    // Tự động tiêm vào UserService
-    // UserService là một lớp dịch vụ của NestJS cho phép bạn thực hiện các thao tác CRUD (Create, Read, Update, Delete) trên entity User
     constructor(
+        
+        // Tự động tiêm vào UserService
+        // UserService là một lớp dịch vụ của NestJS cho phép bạn thực hiện các thao tác CRUD (Create, Read, Update, Delete) trên entity User
         private userService: UserService
     ) { }
     
@@ -97,7 +97,10 @@ export class UserController {
     @Put(':id')
     // Cập nhật thông tin người dùng
     // update() là một phương thức của UserService cho phép bạn cập nhật thông tin người dùng
-    update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+    update(
+        @Param('id') id: string,
+        @Body() updateUserDto: UpdateUserDto
+    ) {
 
         // Gọi phương thức update() của UserService để cập nhật thông tin người dùng
         // Trả về dữ liệu đã cập nhật (mới và cũ)
@@ -159,7 +162,10 @@ export class UserController {
     }))
     // uploadAvatar() là một phương thức của UserService cho phép bạn tải lên ảnh đại diện
     // UploadedFile() là một decorator của NestJS cho phép bạn lấy file tải lên từ request
-    uploadAvatar(@Req() req:any, @UploadedFile() file: Express.Multer.File) {
+    uploadAvatar(
+        @Req() req:any,
+        @UploadedFile() file: Express.Multer.File
+    ) {
         console.log("upload")
         console.log("user data", req.user_data)
         console.log(file)

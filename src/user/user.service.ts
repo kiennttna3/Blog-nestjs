@@ -79,20 +79,20 @@ export class UserService {
 
 
         // Trả về dữ liệu người dùng với các trường cần thiết
-        // data: danh sách người dùng
-        // currenPage: trang hiện tại
-        // items_per_page: số lượng bản ghi mỗi trang
-        // total: tổng số bản ghi
-        // last_page: trang cuối cùng
-        // next_page: trang tiếp theo
-        // prev_page: trang trước đó
         return {
+            // Danh sách người dùng
             data: res,
+            // Trang hiện tại
             currenPage: page,
+            // Số lượng bản ghi mỗi trang
             items_per_page: items_per_page,
+            // Tổng số bản ghi
             total: total,
+            // Trang cuối cùng
             last_page: lastPage,
+             // Trang tiếp theo
             next_page: nextPage,
+            // Trang trước đó
             prev_page: prevPage
         }
     }
@@ -138,10 +138,13 @@ export class UserService {
 
 
     // Cập nhật thông tin người dùng
-    async update(id: number, updateUserDto: UpdateUserDto): Promise<UpdateUserDto> {
+    async update(
+        id: number,
+        updateUserDto: UpdateUserDto
+    ): Promise<UpdateUserDto> {
 
         // Check nếu ID không tồn tại
-        const checkId = await this.userRepository.findOneBy({ id })
+        const checkId = await this.userRepository.findOneBy( { id } )
 
         // Nếu không tìm thấy người dùng với ID đó, ném ra lỗi 401
         if (!checkId) {
@@ -179,7 +182,10 @@ export class UserService {
 
 
     // Cập nhật avatar người dùng
-    async updateAvatar(id: number, avatar: string): Promise<UpdateResult> {
+    async updateAvatar(
+        id: number,
+        avatar: string
+    ): Promise<UpdateResult> {
 
         // cập nhật avatar cho người dùng
         return await this.userRepository.update({ id }, { avatar })

@@ -35,6 +35,8 @@ export class PostService {
         // Tính toán số lượng bản ghi cần bỏ qua
         const skip = (page - 1) * items_per_page
 
+        const category = Number(query.category) || undefined
+
         // Nếu không có giá trị cho search, mặc định là rỗng
         const keyword = query.search ? query.search : ''
 
@@ -56,21 +58,32 @@ export class PostService {
 
             
             relations: {
-                user: true
+                user: true,
+                category: true
             },
 
             // Tìm kiếm theo các trường
             where: [
                 { 
-                    title: Like(`%${ keyword }%`)
+                    title: Like(`%${ keyword }%`),
+                    category: {
+                        id: category
+                    }
                 },
                 { 
-                    description: Like(`%${ keyword }%`)
+                    description: Like(`%${ keyword }%`),
+                    category: {
+                        id: category
+                    }
                 }
             ],
 
             // Chọn các trường cần thiết
             select: {
+                category: {
+                    id: true,
+                    name: true
+                },
                 user: {
                     id: true,
                     first_name: true,
@@ -92,20 +105,20 @@ export class PostService {
 
 
         // Trả về dữ liệu bài viết với các trường cần thiết
-        // data: danh sách bài viết
-        // currenPage: trang hiện tại
-        // items_per_page: số lượng bản ghi mỗi trang
-        // total: tổng số bản ghi
-        // last_page: trang cuối cùng
-        // next_page: trang tiếp theo
-        // prev_page: trang trước đó
         return {
+            // Danh sách người dùng
             data: res,
+            // Trang hiện tại
             currenPage: page,
+            // Số lượng bản ghi mỗi trang
             items_per_page: items_per_page,
+            // Tổng số bản ghi
             total: total,
+            // Trang cuối cùng
             last_page: lastPage,
+             // Trang tiếp theo
             next_page: nextPage,
+            // Trang trước đó
             prev_page: prevPage
         }
     }
@@ -118,16 +131,25 @@ export class PostService {
         
         // Check nếu ID không tồn tại
         const checkId = await this.postRepository.findOne({
-            where: { id },
-            relations: ['user'],
+            where: { 
+                id 
+            },
+            relations: [
+                'user',
+                'category'
+            ],
             select: {
-            user: {
-                id: true,
-                first_name: true,
-                last_name: true,
-                email: true,
-                avatar: true
-            }
+                category: {
+                    id: true,
+                    name: true
+                },
+                user: {
+                    id: true,
+                    first_name: true,
+                    last_name: true,
+                    email: true,
+                    avatar: true
+                }
             }
         })
     
@@ -145,7 +167,10 @@ export class PostService {
 
 
     // Tạo mới bài viết
-    async create(userId: number, createPostDto: CreatePostDto): Promise<Post> {
+    async create(
+        userId: number,
+        createPostDto: CreatePostDto
+    ): Promise<Post> {
 
         // Tìm kiếm người dùng theo id
         const user = await this.userRepository.findOneBy({ id: userId })
@@ -182,7 +207,10 @@ export class PostService {
 
 
     // Cập nhật bài viết
-    async update(id: number, updatePostDto: UpdatePostDto): Promise<UpdateResult> {
+    async update(
+        id: number,
+        updatePostDto: UpdatePostDto
+    ): Promise<UpdateResult> {
 
         // Tìm kiếm bài viết theo id
         const post = await this.postRepository.findOneBy({ id })
